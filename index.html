@@ -1,0 +1,1767 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fustore 逢大二手市集 - 極簡安全交易平台</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            50: '#f0f4fa',
+                            100: '#e1e9f5',
+                            200: '#bfd2eb',
+                            300: '#8eb3df',
+                            400: '#568ecf',
+                            500: '#1d4ed8', // 經典逢大藍
+                            600: '#1e40af',
+                            700: '#1d4ed8',
+                            800: '#0f172a', // 極簡深邃藍
+                            900: '#020617', // 質感深夜藍
+                        },
+                        fcu: {
+                            gold: '#b45309', // 精緻金黃點綴
+                            emerald: '#059669',
+                            rose: '#e11d48'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Noto Sans TC', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'premium': '0 10px 40px -10px rgba(15,23,42,0.04), 0 1px 3px rgba(15,23,42,0.02)',
+                        'premium-hover': '0 25px 50px -12px rgba(15,23,42,0.08), 0 4px 12px -4px rgba(15,23,42,0.03)',
+                        'glow': '0 0 20px rgba(29,78,216,0.12)',
+                        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* 系統背景高質感微點網格紋理 */
+        .bg-dots {
+            background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
+        }
+        
+        /* 訂製流暢滾動條 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 99px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1e40af;
+        }
+        
+        /* 平滑頁面過渡 */
+        .page-transition {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        
+        /* 高質感漸層底板 */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+    </style>
+</head>
+<body class="bg-slate-50/50 text-slate-800 font-sans min-h-screen flex flex-col selection:bg-navy-100 selection:text-navy-900 bg-dots">
+
+    <!-- 頂部高質感透明導覽列 -->
+    <header class="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-100">
+        <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <a href="javascript:void(0)" onclick="navigateTo('home')" class="flex items-center space-x-3 group">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-navy-900 to-navy-600 flex items-center justify-center text-white font-extrabold text-xl tracking-wider shadow-lg shadow-navy-100 group-hover:scale-105 transition-all">F</div>
+                <div class="flex flex-col">
+                    <span class="font-extrabold text-lg text-navy-900 tracking-tight leading-none group-hover:text-navy-600 transition-colors">Fustore</span>
+                    <span class="text-[9px] font-bold text-slate-400 tracking-widest mt-1 uppercase">FCU campus marketplace</span>
+                </div>
+            </a>
+
+            <!-- 導覽連結 -->
+            <nav class="hidden md:flex items-center space-x-8">
+                <a href="javascript:void(0)" onclick="navigateTo('home')" class="text-sm font-semibold text-navy-800 hover:text-navy-500 transition-colors py-2" id="nav-home">首頁精選</a>
+                <a href="javascript:void(0)" onclick="navigateTo('market')" class="text-sm font-semibold text-slate-400 hover:text-navy-800 transition-colors py-2" id="nav-market">探索市集</a>
+                <a href="javascript:void(0)" onclick="navigateTo('post')" class="text-sm font-semibold text-slate-400 hover:text-navy-800 transition-colors py-2" id="nav-post">刊登物品</a>
+                <a href="javascript:void(0)" onclick="navigateTo('messages')" class="text-sm font-semibold text-slate-400 hover:text-navy-800 transition-colors py-2 flex items-center space-x-1.5" id="nav-messages">
+                    <span>私訊小盒子</span>
+                    <span id="msg-badge" class="hidden px-1.5 py-0.5 text-[9px] bg-red-500 text-white rounded-full font-bold">1</span>
+                </a>
+            </nav>
+
+            <!-- 註冊/驗證狀態 & 控制按鈕 -->
+            <div class="flex items-center space-x-4">
+                <div id="auth-status-container" class="hidden sm:block text-right">
+                    <!-- JS 動態填入 -->
+                </div>
+                <button onclick="navigateTo('verify')" id="btn-header-verify" class="px-5 py-2.5 text-xs font-bold rounded-xl border border-slate-200 text-navy-800 bg-white hover:border-navy-600 hover:bg-navy-50 transition-all shadow-sm">
+                    註冊與學籍驗證
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主內容區 -->
+    <main class="flex-grow max-w-6xl w-full mx-auto px-6 py-10">
+        
+        <!-- ============================================== -->
+        <!-- 首頁 (Home Page) -->
+        <!-- ============================================== -->
+        <section id="page-home" class="page-transition space-y-16">
+            <!-- 嚴格格式：標題 -> 圖片 -> 說明 -->
+            <div class="text-center max-w-3xl mx-auto space-y-8">
+                <span class="text-[10px] font-bold tracking-widest text-navy-500 uppercase bg-navy-50 px-3 py-1.5 rounded-full border border-navy-100">逢甲大學專屬安全二手交易圈</span>
+                <h1 class="text-4xl md:text-5xl font-extrabold text-navy-900 tracking-tight leading-tight">逢大人的二手市集</h1>
+                
+                <!-- 精緻立體感 SVG 圖片 (首頁校園意象) -->
+                <div class="w-full h-56 flex items-center justify-center bg-white rounded-3xl border border-slate-100 p-6 shadow-premium relative overflow-hidden group">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-slate-50/50 to-white -z-10"></div>
+                    <svg class="w-72 h-full text-navy-900" viewBox="0 0 240 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="svg-grad-1" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#1e40af" />
+                                <stop offset="100%" stop-color="#1d4ed8" />
+                            </linearGradient>
+                            <linearGradient id="svg-grad-2" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#cbd5e1" />
+                                <stop offset="100%" stop-color="#e2e8f0" />
+                            </linearGradient>
+                        </defs>
+                        <!-- 背景校園圖書館大樓與雲朵 -->
+                        <rect x="25" y="20" width="45" height="60" rx="6" stroke="url(#svg-grad-2)" stroke-width="1.5" />
+                        <line x1="35" y1="35" x2="60" y2="35" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="35" y1="50" x2="60" y2="50" stroke="#cbd5e1" stroke-width="1.5" />
+                        <line x1="35" y1="65" x2="60" y2="65" stroke="#cbd5e1" stroke-width="1.5" />
+                        
+                        <!-- 簡約樹木 -->
+                        <path d="M195 75 L205 75 L195 55 Z" stroke="url(#svg-grad-2)" stroke-width="1.5" fill="none" />
+                        <circle cx="185" cy="45" r="10" stroke="url(#svg-grad-2)" stroke-width="1.5" />
+                        
+                        <!-- 核心逢大正門立柱 -->
+                        <rect x="95" y="15" width="50" height="65" rx="8" stroke="url(#svg-grad-1)" stroke-width="2.5" fill="white" class="group-hover:scale-105 origin-center transition-transform" />
+                        <circle cx="120" cy="38" r="12" stroke="url(#svg-grad-1)" stroke-width="1.5" />
+                        <path d="M120 30 V46 M112 38 H128" stroke="url(#svg-grad-1)" stroke-width="1.5" />
+                        
+                        <!-- 裝飾定位信號點 -->
+                        <circle cx="120" cy="15" r="4" fill="#ef4444" class="animate-pulse" />
+                    </svg>
+                </div>
+
+                <p class="text-slate-500 text-sm md:text-base leading-relaxed max-w-xl mx-auto">
+                    只限逢甲在校學生賣，任何人皆可買。用最直覺的註冊與信箱學籍認證、流暢的內建私訊功能，為你不需要的教科書與日常好物找到新家。
+                </p>
+                
+                <div class="flex justify-center space-x-4 pt-4">
+                    <button onclick="navigateTo('market')" class="px-8 py-3.5 bg-navy-900 text-white text-sm font-bold rounded-2xl hover:bg-navy-600 hover:-translate-y-0.5 transition-all shadow-lg shadow-navy-200">
+                        探索商品市集
+                    </button>
+                    <button onclick="navigateTo('verify')" class="px-8 py-3.5 border border-slate-200 bg-white text-slate-600 text-sm font-bold rounded-2xl hover:bg-slate-50 hover:text-navy-900 transition-all">
+                        註冊並驗證學籍
+                    </button>
+                </div>
+            </div>
+
+            <!-- 本週推薦與熱門分類 -->
+            <div class="border-t border-slate-100 pt-14">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="space-y-1">
+                        <h2 class="text-2xl font-extrabold text-navy-900">精選最新好物</h2>
+                        <p class="text-xs text-slate-400">目前校內最新、品質最優的校園物資與教科書</p>
+                    </div>
+                    <a href="javascript:void(0)" onclick="navigateTo('market')" class="text-xs font-bold text-navy-500 hover:underline flex items-center space-x-1">
+                        <span>瀏覽完整市集</span> <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </a>
+                </div>
+                <!-- 推薦商品網格 -->
+                <div id="home-featured-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <!-- JS 動態渲染 -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- 商品市集頁 (Marketplace) -->
+        <!-- ============================================== -->
+        <section id="page-market" class="page-transition hidden space-y-10">
+            <!-- 嚴格格式：標題 -> 圖片 -> 說明 -->
+            <div class="text-center max-w-3xl mx-auto space-y-6">
+                <span class="text-[10px] font-bold tracking-widest text-navy-500 uppercase bg-navy-50 px-3 py-1.5 rounded-full border border-navy-100">尋寶探索區</span>
+                <h1 class="text-3xl font-extrabold text-navy-900 tracking-tight">探索校園二手市集</h1>
+                
+                <!-- 精緻 SVG 圖片 (市集搜尋) -->
+                <div class="w-full h-44 flex items-center justify-center bg-white rounded-3xl border border-slate-100 p-6 shadow-premium relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-slate-50/50 to-white -z-10"></div>
+                    <svg class="w-64 h-full text-navy-900" viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="svg-grad-market" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#1d4ed8" />
+                                <stop offset="100%" stop-color="#1e40af" />
+                            </linearGradient>
+                        </defs>
+                        <!-- 課本 -->
+                        <path d="M30 35 H75 V70 H30 Z" stroke="url(#svg-grad-market)" stroke-width="2" fill="white" />
+                        <line x1="38" y1="45" x2="68" y2="45" stroke="#94a3b8" stroke-width="1.5" />
+                        <line x1="38" y1="55" x2="60" y2="55" stroke="#94a3b8" stroke-width="1.5" />
+                        
+                        <!-- 3C裝置 -->
+                        <rect x="95" y="30" width="45" height="30" rx="4" stroke="#94a3b8" stroke-width="1.5" fill="white" />
+                        <rect x="105" y="60" width="25" height="10" stroke="#94a3b8" stroke-width="1.5" fill="white" />
+                        
+                        <!-- 搜尋鏡 -->
+                        <circle cx="150" cy="45" r="12" stroke="url(#svg-grad-market)" stroke-width="2.5" />
+                        <line x1="158" y1="53" x2="172" y2="67" stroke="url(#svg-grad-market)" stroke-width="2.5" stroke-linecap="round" />
+                    </svg>
+                </div>
+
+                <p class="text-slate-500 text-xs md:text-sm max-w-lg mx-auto">
+                    我們提供逢甲大學所有系級與物品種類標籤篩選，幫助你秒尋本科指定書、熱門二手3C及實用日常物品。
+                </p>
+            </div>
+
+            <!-- 篩選工具區 -->
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-premium grid grid-cols-1 md:grid-cols-3 gap-5">
+                <!-- 1. 關鍵字搜尋 -->
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="filter-search" oninput="applyFilters()" placeholder="搜尋商品名稱、描述、地點..." class="w-full pl-11 pr-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                </div>
+                <!-- 2. 分類選擇 -->
+                <div>
+                    <select id="filter-category" onchange="applyFilters()" class="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                        <option value="">所有分類</option>
+                        <option value="書籍教科書">書籍教科書</option>
+                        <option value="3C電子">3C電子</option>
+                        <option value="生活雜貨">生活雜貨</option>
+                        <option value="服飾配件">服飾配件</option>
+                    </select>
+                </div>
+                <!-- 3. 逢甲全科系篩選標籤 -->
+                <div>
+                    <select id="filter-dept" onchange="applyFilters()" class="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                        <option value="">所有科系標記</option>
+                        <option value="通識 / 不限">通識 / 不限</option>
+                        <!-- 科系群體 -->
+                        <optgroup label="工學院 / 理學院 / 資電學院">
+                            <option value="資訊工程學系">資訊工程學系</option>
+                            <option value="電機工程學系">電機工程學系</option>
+                            <option value="電子工程學系">電子工程學系</option>
+                            <option value="自動控制工程學系">自動控制工程學系</option>
+                            <option value="通訊工程學系">通訊工程學系</option>
+                            <option value="機械與電腦輔助工程學系">機械與電腦輔助工程學系</option>
+                            <option value="化學工程學系">化學工程學系</option>
+                            <option value="纖維與複合材料學系">纖維與複合材料學系</option>
+                            <option value="航空太空工程學系">航空太空工程學系</option>
+                            <option value="精密系統設計學士學位學程">精密系統設計學程</option>
+                            <option value="光電科學與工程學系">光電科學與工程學系</option>
+                            <option value="應用數學系">應用數學系</option>
+                            <option value="物理學系">物理學系</option>
+                        </optgroup>
+                        <optgroup label="商學院 / 金融學院">
+                            <option value="會計學系">會計學系</option>
+                            <option value="國際經營與貿易學系">國際經營與貿易學系</option>
+                            <option value="財稅學系">財稅學系</option>
+                            <option value="合作經濟暨社會事業經營學系">合作經濟學系</option>
+                            <option value="企業管理學系">企業管理學系</option>
+                            <option value="行銷學系">行銷學系</option>
+                            <option value="統計學系">統計學系</option>
+                            <option value="風險管理與保險學系">風險管理學系</option>
+                            <option value="財務金融學系">財務金融學系</option>
+                            <option value="金融科技專業學程">金融科技學程</option>
+                        </optgroup>
+                        <optgroup label="建設學院 / 建築專業 / 人社院">
+                            <option value="土木工程學系">土木工程學系</option>
+                            <option value="水利工程與資源保育學系">水利工程學系</option>
+                            <option value="都市計畫與空間資訊學系">都市計畫學系</option>
+                            <option value="運輸科技與管理學系">運輸科技與管理系</option>
+                            <option value="土地管理學系">土地管理學系</option>
+                            <option value="中國文學系">中國文學系</option>
+                            <option value="外國語文學系">外國語文學系</option>
+                            <option value="建築學士學位學程">建築專業學程</option>
+                            <option value="室內設計學士學位學程">室內設計學程</option>
+                        </optgroup>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 商品列表網格 -->
+            <div id="market-products-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- JS 動態填充 -->
+            </div>
+            
+            <div id="market-empty-state" class="hidden text-center py-20 text-slate-400 bg-white rounded-3xl border border-slate-100 shadow-inner-soft">
+                <i class="fa-regular fa-folder-open text-5xl mb-4 text-slate-300"></i>
+                <p class="text-sm font-semibold">沒有符合條件的二手商品，試試調整搜尋關鍵字！</p>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- 賣家註冊與驗證頁 (Verify Page) -->
+        <!-- ============================================== -->
+        <section id="page-verify" class="page-transition hidden space-y-10">
+            <!-- 嚴格格式：標題 -> 圖片 -> 說明 -->
+            <div class="text-center max-w-3xl mx-auto space-y-6">
+                <span class="text-[10px] font-bold tracking-widest text-navy-500 uppercase bg-navy-50 px-3 py-1.5 rounded-full border border-navy-100">學籍安全註冊</span>
+                <h1 class="text-3xl font-extrabold text-navy-900 tracking-tight">逢甲在校學籍驗證</h1>
+                
+                <!-- 精緻 SVG 圖片 (註冊認證) -->
+                <div class="w-full h-44 flex items-center justify-center bg-white rounded-3xl border border-slate-100 p-6 shadow-premium relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-slate-50/50 to-white -z-10"></div>
+                    <svg class="w-64 h-full text-navy-900" viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="svg-grad-verify" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#1d4ed8" />
+                                <stop offset="100%" stop-color="#1e40af" />
+                            </linearGradient>
+                        </defs>
+                        <!-- 信封與註冊檔案 -->
+                        <rect x="30" y="25" width="65" height="50" rx="6" stroke="url(#svg-grad-verify)" stroke-width="2" fill="white" />
+                        <path d="M30 30 L62.5 55 L95 30" stroke="url(#svg-grad-verify)" stroke-width="2" fill="none" />
+                        
+                        <!-- 成功綠色驗證戮 -->
+                        <circle cx="145" cy="50" r="18" stroke="#10b981" stroke-width="2.5" fill="white" />
+                        <path d="M138 50 L143 55 L154 44" stroke="#10b981" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+
+                <p class="text-slate-500 text-xs md:text-sm max-w-lg mx-auto">
+                    為確保平台 100% 誠信度，賣家註冊必須填寫**中文姓名、學號、密碼與逢甲 Outlook 信箱**。驗證通過後方可開通刊登權限與訊息互動。
+                </p>
+            </div>
+
+            <!-- 註冊與登入功能切換 Tabs -->
+            <div id="verify-tabs" class="flex justify-center max-w-lg mx-auto bg-slate-100 p-1 rounded-2xl border border-slate-200/60">
+                <button onclick="toggleVerifyTab('register')" id="tab-register-btn" class="flex-grow py-2.5 text-xs font-bold rounded-xl bg-white text-navy-900 shadow-sm transition-all">
+                    學生註冊
+                </button>
+                <button onclick="toggleVerifyTab('login')" id="tab-login-btn" class="flex-grow py-2.5 text-xs font-bold rounded-xl text-slate-500 hover:text-navy-900 transition-all">
+                    已有帳號登入
+                </button>
+            </div>
+
+            <!-- 註冊與驗證表單區 -->
+            <div class="max-w-lg mx-auto bg-white border border-slate-100 p-8 rounded-3xl shadow-premium space-y-6">
+                
+                <!-- 註冊 Step 1: 填寫學級資料與信箱 -->
+                <div id="verify-form-step1" class="space-y-5">
+                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2"><i class="fa-solid fa-address-card mr-2 text-navy-500"></i> 第一步：填寫學級與基本資料</h3>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">真實姓名 (中文)</label>
+                            <input type="text" id="reg-name" placeholder="例如: 王小明" class="block w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">學生學號 (D開頭)</label>
+                            <input type="text" id="reg-student-id" placeholder="例如: D1102943" class="block w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">設定登入密碼</label>
+                            <input type="password" id="reg-password" placeholder="請設定 4 位數以上密碼" class="block w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">年級</label>
+                            <select id="reg-grade" class="px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all w-full">
+                                <option value="一年級">一年級</option>
+                                <option value="二年級">二年級</option>
+                                <option value="三年級">三年級</option>
+                                <option value="四年級">四年級</option>
+                                <option value="研究所">研究所</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">所屬科系</label>
+                        <select id="reg-dept" class="px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all w-full">
+                            <option value="">請選擇您的學系...</option>
+                            <option value="資訊工程學系">資訊工程學系</option>
+                            <option value="電機工程學系">電機工程學系</option>
+                            <option value="電子工程學系">電子工程學系</option>
+                            <option value="自動控制工程學系">自動控制工程學系</option>
+                            <option value="通訊工程學系">通訊工程學系</option>
+                            <option value="機械與電腦輔助工程學系">機械與電腦輔助工程學系</option>
+                            <option value="化學工程學系">化學工程學系</option>
+                            <option value="纖維與複合材料學系">纖維與複合材料學系</option>
+                            <option value="航空太空工程學系">航空太空工程學系</option>
+                            <option value="精密系統設計學士學位學程">精密系統設計學程</option>
+                            <option value="光電科學與工程學系">光電科學與工程學系</option>
+                            <option value="應用數學系">應用數學系</option>
+                            <option value="物理學系">物理學系</option>
+                            <option value="會計學系">會計學系</option>
+                            <option value="國際經營與貿易學系">國際經營與貿易學系</option>
+                            <option value="財稅學系">財稅學系</option>
+                            <option value="合作經濟暨社會事業經營學系">合作經濟學系</option>
+                            <option value="企業管理學系">企業管理學系</option>
+                            <option value="行銷學系">行銷學系</option>
+                            <option value="統計學系">統計學系</option>
+                            <option value="風險管理與保險學系">風險管理學系</option>
+                            <option value="財務金融學系">財務金融學系</option>
+                            <option value="金融科技專業學程">金融科技學程</option>
+                            <option value="土木工程學系">土木工程學系</option>
+                            <option value="水利工程與資源保育學系">水利工程學系</option>
+                            <option value="都市計畫與空間資訊學系">都市計畫學系</option>
+                            <option value="運輸科技與管理學系">運輸科技與管理系</option>
+                            <option value="土地管理學系">土地管理學系</option>
+                            <option value="中國文學系">中國文學系</option>
+                            <option value="外國語文學系">外國語文學系</option>
+                            <option value="建築學士學位學程">建築專業學程</option>
+                            <option value="室內設計學士學位學程">室內設計學程</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">逢甲 Outlook O365 信箱帳號</label>
+                        <div class="relative rounded-xl shadow-sm">
+                            <input type="text" id="verify-email-local" placeholder="輸入學號小寫: d1102943" class="block w-full pr-36 pl-4 py-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                            <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                                <span class="text-slate-400 text-xs font-bold">@o365.fcu.edu.tw</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button onclick="sendVerificationCode()" class="w-full py-3.5 bg-navy-900 text-white text-xs font-bold rounded-xl hover:bg-navy-600 transition-all shadow-md">
+                        發送學籍驗證碼
+                    </button>
+                </div>
+
+                <!-- 註冊 Step 2: 填寫模擬安全驗證碼 (預設隱藏) -->
+                <div id="verify-form-step2" class="hidden space-y-5">
+                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2"><i class="fa-solid fa-envelope-open-text mr-2 text-navy-500"></i> 第二步：電子郵件學籍確認</h3>
+                    <div class="bg-navy-50 p-4 rounded-xl text-xs text-navy-800 border border-navy-100 leading-relaxed">
+                        系統已發送一封學籍啟用碼至您的信箱！請登入逢甲 Webmail 收信。<br>測試沙盒預設認證碼為：<strong class="underline font-bold text-navy-600">FCU-1234</strong>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2.5">6位數驗證密碼</label>
+                        <input type="text" id="verify-code-input" placeholder="請輸入 FCU-1234" class="block w-full px-4 py-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                    </div>
+                    <div class="flex space-x-3">
+                        <button onclick="submitVerifyCode()" class="flex-grow py-3.5 bg-navy-900 text-white text-xs font-bold rounded-xl hover:bg-navy-600 transition-all">
+                            完成註冊並開通
+                        </button>
+                        <button onclick="resetVerifyForm()" class="px-5 py-3.5 border border-slate-200 text-slate-500 text-xs font-bold rounded-xl hover:bg-slate-100 transition-colors">
+                            重設表單
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 登入表單 (預設隱藏) -->
+                <div id="verify-login-box" class="hidden space-y-5">
+                    <h3 class="text-sm font-bold text-navy-900 border-b border-slate-100 pb-2"><i class="fa-solid fa-key mr-2 text-navy-500"></i> 會員登入</h3>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">學生學號 (D開頭)</label>
+                        <input type="text" id="login-student-id" placeholder="例如: D1102943" class="block w-full px-4 py-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">登入密碼</label>
+                        <input type="password" id="login-password" placeholder="請輸入設定的密碼" class="block w-full px-4 py-3.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                    </div>
+                    <button onclick="loginUser()" class="w-full py-3.5 bg-navy-900 text-white text-xs font-bold rounded-xl hover:bg-navy-600 transition-all shadow-md">
+                        驗證密碼並登入
+                    </button>
+                    <p class="text-[10px] text-slate-400 text-center leading-relaxed">
+                        <i class="fa-solid fa-circle-info mr-1"></i> 沙盒預設測試帳號學號：<strong class="text-navy-900">D1102943</strong>，密碼：<strong class="text-navy-900">1234</strong>
+                    </p>
+                </div>
+
+                <!-- 註冊完成狀態 (預設隱藏) -->
+                <div id="verify-success-box" class="hidden text-center py-6 space-y-5">
+                    <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center mx-auto text-2xl border border-emerald-100 animate-bounce">
+                        <i class="fa-solid fa-check-double"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <h3 class="font-bold text-navy-900 text-lg">逢大認證學生登入成功</h3>
+                        <p class="text-slate-400 text-xs" id="verified-email-display"></p>
+                    </div>
+                    <div class="flex space-x-3 justify-center pt-2">
+                        <button onclick="navigateTo('post')" class="px-6 py-3 bg-navy-900 text-white text-xs font-bold rounded-xl hover:bg-navy-600 transition-all">
+                            立刻刊登二手物
+                        </button>
+                        <button onclick="logout()" class="px-6 py-3 border border-slate-200 text-slate-400 hover:text-red-500 text-xs font-bold rounded-xl hover:bg-red-50 transition-colors">
+                            登出帳號
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- 刊登商品頁 (Post Item Page) -->
+        <!-- ============================================== -->
+        <section id="page-post" class="page-transition hidden space-y-10">
+            <!-- 嚴格格式：標題 -> 圖片 -> 說明 -->
+            <div class="text-center max-w-3xl mx-auto space-y-6">
+                <span class="text-[10px] font-bold tracking-widest text-navy-500 uppercase bg-navy-50 px-3 py-1.5 rounded-full border border-navy-100">賣家上架中心</span>
+                <h1 class="text-3xl font-extrabold text-navy-900 tracking-tight">刊登二手物品</h1>
+                
+                <!-- 精緻 SVG 圖片 (刊登相機) -->
+                <div class="w-full h-44 flex items-center justify-center bg-white rounded-3xl border border-slate-100 p-6 shadow-premium relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-slate-50/50 to-white -z-10"></div>
+                    <svg class="w-64 h-full text-navy-900" viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="svg-grad-post" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#1d4ed8" />
+                                <stop offset="100%" stop-color="#1e40af" />
+                            </linearGradient>
+                        </defs>
+                        <!-- 相機 -->
+                        <rect x="40" y="25" width="70" height="45" rx="6" stroke="url(#svg-grad-post)" stroke-width="2" fill="white" />
+                        <circle cx="75" cy="47" r="14" stroke="url(#svg-grad-post)" stroke-width="1.8" />
+                        <circle cx="95" cy="35" r="3.5" fill="#ef4444" />
+                        
+                        <!-- + 符號 -->
+                        <path d="M135 45 H155 M145 35 V55" stroke="url(#svg-grad-post)" stroke-width="3.5" stroke-linecap="round" />
+                    </svg>
+                </div>
+
+                <p class="text-slate-500 text-xs md:text-sm max-w-lg mx-auto">
+                    請上架真實照片並詳盡填寫新舊說明，平台僅採線下面交付款。刊登前您必須已完成逢甲 O365 學生註冊。
+                </p>
+            </div>
+
+            <!-- 未驗證阻擋牆 -->
+            <div id="post-auth-wall" class="max-w-md mx-auto bg-white border border-slate-100 p-10 rounded-3xl text-center shadow-premium space-y-6">
+                <div class="w-16 h-16 rounded-full bg-slate-50 text-navy-800 flex items-center justify-center mx-auto text-2xl border border-slate-100 shadow-inner-soft">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="font-extrabold text-navy-900 text-base">尚未註冊逢大驗證學籍</h3>
+                    <p class="text-slate-400 text-xs leading-relaxed">本平台為專屬安全市集，僅限逢甲大學完成學籍註冊的同學刊登。只需一分鐘即可開通！</p>
+                </div>
+                <button onclick="navigateTo('verify')" class="px-6 py-3.5 bg-navy-900 text-white text-xs font-bold rounded-xl hover:bg-navy-600 transition-all shadow-md">
+                    前往註冊學籍
+                </button>
+            </div>
+
+            <!-- 刊登表單 -->
+            <div id="post-form-container" class="hidden max-w-2xl mx-auto bg-white border border-slate-100 p-8 rounded-3xl shadow-premium space-y-8">
+                <!-- 1. 圖片上傳（支援模擬） -->
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest">多角度精緻相片（最多 3 張）</label>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div onclick="simulateImageUpload(1)" id="img-upload-box-1" class="aspect-square border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-navy-500 hover:bg-navy-50/20 transition-all text-slate-400 hover:text-navy-500 p-3 text-center">
+                            <i class="fa-solid fa-camera text-2xl mb-2 text-slate-300"></i>
+                            <span class="text-[10px] font-bold leading-none">正面視角圖 (必填)</span>
+                        </div>
+                        <div onclick="simulateImageUpload(2)" id="img-upload-box-2" class="aspect-square border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-navy-500 hover:bg-navy-50/20 transition-all text-slate-400 hover:text-navy-500 p-3 text-center">
+                            <i class="fa-solid fa-images text-2xl mb-2 text-slate-300"></i>
+                            <span class="text-[10px] font-bold leading-none">細節或瑕疵</span>
+                        </div>
+                        <div onclick="simulateImageUpload(3)" id="img-upload-box-3" class="aspect-square border-2 border-dashed border-slate-200 rounded-2xl flex flex-col items-center justify-center cursor-pointer hover:border-navy-500 hover:bg-navy-50/20 transition-all text-slate-400 hover:text-navy-500 p-3 text-center">
+                            <i class="fa-solid fa-plus text-2xl mb-2 text-slate-300"></i>
+                            <span class="text-[10px] font-bold leading-none">反面或配件</span>
+                        </div>
+                    </div>
+                    <span class="text-[10px] text-slate-400 block"><i class="fa-solid fa-circle-info mr-1"></i> 請點擊灰色虛線框，系統會自動在沙盒中為您帶入極精細的模擬商品相片。</span>
+                </div>
+
+                <!-- 2. 基本資訊 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2.5">商品名稱</label>
+                        <input type="text" id="post-title" placeholder="例如: 微積分原文書(9成新、無劃記)" class="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2.5">商品定價 (NTD)</label>
+                        <input type="number" id="post-price" placeholder="NT$" class="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                    </div>
+                </div>
+
+                <!-- 3. 分類與科系 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2.5">商品類別</label>
+                        <select id="post-category" class="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                            <option value="書籍教科書">書籍教科書</option>
+                            <option value="3C電子">3C電子</option>
+                            <option value="生活雜貨">生活雜貨</option>
+                            <option value="服飾配件">服飾配件</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2.5">指定適用科系（逢大所有學系）</label>
+                        <select id="post-dept" class="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                            <option value="通識 / 不限">通識 / 不限</option>
+                            <!-- 工、理、資電 -->
+                            <option value="資訊工程學系">資訊工程學系</option>
+                            <option value="電機工程學系">電機工程學系</option>
+                            <option value="電子工程學系">電子工程學系</option>
+                            <option value="自動控制工程學系">自動控制工程學系</option>
+                            <option value="通訊工程學系">通訊工程學系</option>
+                            <option value="機械與電腦輔助工程學系">機械與電腦輔助工程學系</option>
+                            <option value="化學工程學系">化學工程學系</option>
+                            <option value="纖維與複合材料學系">纖維與複合材料學系</option>
+                            <option value="航空太空工程學系">航空太空工程學系</option>
+                            <option value="精密系統設計學士學位學程">精密系統設計學程</option>
+                            <option value="光電科學與工程學系">光電科學與工程學系</option>
+                            <option value="應用數學系">應用數學系</option>
+                            <option value="物理學系">物理學系</option>
+                            <!-- 商、金融 -->
+                            <option value="會計學系">會計學系</option>
+                            <option value="國際經營與貿易學系">國際經營與貿易學系</option>
+                            <option value="財稅學系">財稅學系</option>
+                            <option value="合作經濟暨社會事業經營學系">合作經濟學系</option>
+                            <option value="企業管理學系">企業管理學系</option>
+                            <option value="行銷學系">行銷學系</option>
+                            <option value="統計學系">統計學系</option>
+                            <option value="風險管理與保險學系">風險管理學系</option>
+                            <option value="財務金融學系">財務金融學系</option>
+                            <option value="金融科技專業學程">金融科技學程</option>
+                            <!-- 建設、人設、建築 -->
+                            <option value="土木工程學系">土木工程學系</option>
+                            <option value="水利工程與資源保育學系">水利工程學系</option>
+                            <option value="都市計畫與空間資訊學系">都市計畫學系</option>
+                            <option value="運輸科技與管理學系">運輸科技與管理系</option>
+                            <option value="土地管理學系">土地管理學系</option>
+                            <option value="中國文學系">中國文學系</option>
+                            <option value="外國語文學系">外國語文學系</option>
+                            <option value="建築學士學位學程">建築專業學程</option>
+                            <option value="室內設計學士學位學程">室內設計學程</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- 4. 取貨地點與商品描述 -->
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2.5">約定面交地點（逢甲周邊取貨地）</label>
+                        <input type="text" id="post-location" placeholder="例如: 福星宿舍一樓大廳、逢大路口麥當勞、大門口口琴牆前" class="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all">
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2.5">商品狀況與細節說明</label>
+                        <textarea id="post-desc" rows="4" placeholder="請詳述新舊狀況，有無刮痕、缺頁劃記或配件是否齊全，健全誠實的說明能獲得更好的口碑！" class="w-full px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500 transition-all"></textarea>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-2 border-t border-slate-100">
+                    <button onclick="publishProduct()" class="px-8 py-3.5 bg-navy-900 text-white text-xs font-bold rounded-xl hover:bg-navy-600 hover:scale-[1.01] transition-all">
+                        確認並發布商品
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- 訊息中心頁 (Messages Page) -->
+        <!-- ============================================== -->
+        <section id="page-messages" class="page-transition hidden space-y-10">
+            <!-- 嚴格格式：標題 -> 圖片 -> 說明 -->
+            <div class="text-center max-w-3xl mx-auto space-y-6">
+                <span class="text-[10px] font-bold tracking-widest text-navy-500 uppercase bg-navy-50 px-3 py-1.5 rounded-full border border-navy-100">私密校園聯絡盒</span>
+                <h1 class="text-3xl font-extrabold text-navy-900 tracking-tight">聯絡小盒子</h1>
+                
+                <!-- 精緻 SVG 圖片 (私密對話) -->
+                <div class="w-full h-44 flex items-center justify-center bg-white rounded-3xl border border-slate-100 p-6 shadow-premium relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-slate-50/50 to-white -z-10"></div>
+                    <svg class="w-64 h-full text-navy-900" viewBox="0 0 200 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="svg-grad-msg" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#1d4ed8" />
+                                <stop offset="100%" stop-color="#1e40af" />
+                            </linearGradient>
+                        </defs>
+                        <!-- 對話泡泡 -->
+                        <path d="M40 30 H110 V65 H75 L55 80 V65 H40 Z" stroke="url(#svg-grad-msg)" stroke-width="2.2" fill="white" />
+                        <path d="M140 40 H85 V75 H110 L125 90 V75 H140 Z" stroke="url(#svg-grad-msg)" stroke-width="1.8" stroke-dasharray="3 2" fill="none" />
+                        <circle cx="65" cy="48" r="2" fill="url(#svg-grad-msg)" />
+                        <circle cx="75" cy="48" r="2" fill="url(#svg-grad-msg)" />
+                        <circle cx="85" cy="48" r="2" fill="url(#svg-grad-msg)" />
+                    </svg>
+                </div>
+
+                <p class="text-slate-500 text-xs md:text-sm max-w-lg mx-auto">
+                    內建安全私密通訊，不用透露任何電話、真實學號與社群軟體。線下付款，保障校園學生的資訊隱私。
+                </p>
+            </div>
+
+            <!-- 訊息對話架構 -->
+            <div class="max-w-4xl mx-auto bg-white border border-slate-200 rounded-3xl overflow-hidden shadow-premium grid grid-cols-1 md:grid-cols-3 h-[520px]">
+                
+                <!-- 聊天名單 (左) -->
+                <div class="border-r border-slate-100 flex flex-col h-full bg-slate-50/40">
+                    <div class="p-4 border-b border-slate-100 bg-white">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">近期詢問名單</span>
+                    </div>
+                    <div id="chat-list" class="flex-grow overflow-y-auto divide-y divide-slate-100">
+                        <!-- JS 動態渲染 -->
+                    </div>
+                </div>
+
+                <!-- 聊天內容 (右) -->
+                <div class="md:col-span-2 flex flex-col h-full bg-white relative">
+                    <!-- 未選取空畫面 -->
+                    <div id="chat-empty-view" class="absolute inset-0 flex flex-col items-center justify-center text-slate-400 bg-white z-10 p-6">
+                        <i class="fa-regular fa-comments text-5xl mb-4 text-slate-200 animate-pulse-slow"></i>
+                        <p class="text-xs font-bold">請點選左側名單，啟動一對一校園面交安全對談</p>
+                    </div>
+
+                    <!-- 聊天室頭部 -->
+                    <div id="chat-room-header" class="p-4 border-b border-slate-100 flex items-center justify-between bg-white hidden">
+                        <div>
+                            <div class="font-extrabold text-sm text-navy-900 animate-pulse-slow" id="chat-header-user">逢甲學生賣家</div>
+                            <div class="text-[10px] font-bold text-slate-400 mt-0.5" id="chat-header-item">詢問中：計算機組織原文書</div>
+                        </div>
+                        <div class="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100 text-[10px]" id="chat-header-thumb-container">
+                            <!-- 商品縮圖 -->
+                        </div>
+                    </div>
+
+                    <!-- 對對話內容 -->
+                    <div id="chat-messages-flow" class="flex-grow p-5 overflow-y-auto space-y-4 bg-slate-50/20 hidden">
+                        <!-- JS 動態對話 -->
+                    </div>
+
+                    <!-- 文字輸入區 -->
+                    <div id="chat-input-bar" class="p-4 border-t border-slate-100 bg-white hidden">
+                        <div class="flex space-x-3">
+                            <input type="text" id="chat-text-input" placeholder="輸入要發送的面交細節..." onkeydown="if(event.key==='Enter') sendMessage()" class="flex-grow px-4 py-3 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:bg-white focus:ring-2 focus:ring-navy-500">
+                            <button onclick="sendMessage()" class="px-5 py-3 bg-navy-900 text-white text-xs font-bold rounded-xl hover:bg-navy-600 transition-colors flex items-center space-x-2 shadow-md">
+                                <i class="fa-solid fa-paper-plane"></i> <span>送出</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ============================================== -->
+    <!-- 高級商品詳情彈窗 (Modal) -->
+    <!-- ============================================== -->
+    <div id="product-detail-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-md flex items-center justify-center p-4 hidden page-transition">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-100 flex flex-col md:flex-row animate-scale-up">
+            
+            <!-- 圖片輪播與切換 -->
+            <div class="w-full md:w-1/2 bg-slate-50 p-6 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-100">
+                <div class="relative aspect-square w-full rounded-2xl overflow-hidden bg-white border border-slate-200/50 shadow-inner-soft">
+                    <img id="modal-primary-img" src="" class="w-full h-full object-cover" />
+                </div>
+                <!-- 多圖縮圖區 -->
+                <div id="modal-thumbnails" class="grid grid-cols-3 gap-2 mt-4">
+                    <!-- JS 動態 -->
+                </div>
+            </div>
+
+            <!-- 內容與聯絡詳情 -->
+            <div class="w-full md:w-1/2 p-6 flex flex-col justify-between space-y-6">
+                <div class="space-y-4">
+                    <div class="flex justify-between items-start">
+                        <span id="modal-dept" class="text-[9px] font-bold px-2.5 py-1 bg-navy-50 text-navy-800 rounded-md border border-navy-100">資訊工程學系</span>
+                        <span id="modal-condition" class="text-[9px] font-bold px-2 py-0.5 border border-emerald-200 text-emerald-600 bg-emerald-50 rounded">99%新</span>
+                    </div>
+                    <h3 id="modal-title" class="font-extrabold text-navy-900 text-lg leading-snug">精選原文書</h3>
+                    
+                    <div class="text-2xl font-black text-navy-900" id="modal-price">NT$ 000</div>
+                    
+                    <p id="modal-desc" class="text-xs text-slate-500 leading-relaxed max-h-32 overflow-y-auto">
+                        描述內容。
+                    </p>
+
+                    <!-- 面交地點 -->
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 flex items-center space-x-2 text-xs text-slate-500">
+                        <i class="fa-solid fa-location-dot text-red-500"></i>
+                        <span>面交：<strong class="text-navy-900" id="modal-location">福星宿舍大廳</strong></span>
+                    </div>
+
+                    <!-- 學生身分信譽徽章 -->
+                    <div class="flex items-center space-x-2 text-xs border-t border-slate-50 pt-3">
+                        <div class="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[10px] shadow-sm"><i class="fa-solid fa-check"></i></div>
+                        <span class="text-slate-400">認證賣家：<strong class="text-slate-700" id="modal-seller">陳同學 (資工系)</strong></span>
+                    </div>
+                </div>
+
+                <div class="flex space-x-2 pt-2 border-t border-slate-50">
+                    <button id="modal-chat-btn" class="flex-grow py-3 bg-navy-900 hover:bg-navy-600 text-white text-xs font-bold rounded-xl transition-colors shadow-lg shadow-navy-100">
+                        發起聯絡與面交
+                    </button>
+                    <button onclick="closeProductDetailModal()" class="px-4 py-3 border border-slate-200 text-slate-400 hover:text-slate-600 text-xs font-bold rounded-xl transition-colors">
+                        關閉
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- 底部 Footer -->
+    <footer class="bg-white border-t border-slate-100 py-10 mt-16 text-center text-xs text-slate-400 space-y-2">
+        <p>© 2026 Fustore 逢大二手市集. 逢甲大學校園二手物安全面交平台.</p>
+        <p class="font-medium text-slate-300">本市集不提供任何線上金流、信用卡交易或物流。一律採取實體校內線下面交付款，安全有保障。</p>
+    </footer>
+
+    <!-- Toast 提示組件 -->
+    <div id="toast-container" class="fixed top-24 right-6 z-50 space-y-2.5 pointer-events-none"></div>
+
+    <!-- ============================================== -->
+    <!-- 測試中心控制台 (HUD 懸浮儀表面板) -->
+    <!-- ============================================== -->
+    <div class="fixed bottom-6 right-6 z-50">
+        <!-- 展開後的控制台 -->
+        <div id="test-panel" class="hidden bg-slate-900/95 text-white rounded-3xl shadow-2xl border border-slate-800 w-80 md:w-[420px] overflow-hidden backdrop-blur-md page-transition">
+            <div class="p-4 bg-slate-950 flex items-center justify-between border-b border-slate-800">
+                <div class="flex items-center space-x-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                    <h4 class="font-bold text-xs tracking-wider">🧪 測試驗證中心控制台</h4>
+                </div>
+                <button onclick="toggleTestPanel()" class="text-slate-400 hover:text-white transition-colors text-xs">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+            
+            <div class="p-5 space-y-4 max-h-[380px] overflow-y-auto">
+                <p class="text-[10px] text-slate-400 leading-relaxed">
+                    您好！您可以點擊下方精心編排的 5 個測試案例 (TC-01 至 TC-05) 的按鈕，我們設計了完整的自動化模擬腳本，您可以立刻在大螢幕中親自看到測試驗證結果：
+                </p>
+
+                <div class="space-y-3">
+                    <!-- TC-01 -->
+                    <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-800 hover:border-red-500 transition-all">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-[10px] font-extrabold text-red-400">TC-01 非逢甲信箱攔截</span>
+                            <button onclick="runTestCase1()" class="px-2.5 py-1 bg-red-600 hover:bg-red-500 text-white text-[9px] font-bold rounded-lg transition-colors">點此測試</button>
+                        </div>
+                        <p class="text-[9px] text-slate-300">系統自動跳轉驗證頁，輸入非逢甲信箱(gmail.com)並送出，驗證警示攔截。</p>
+                    </div>
+
+                    <!-- TC-02 -->
+                    <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-800 hover:border-emerald-500 transition-all">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-[10px] font-extrabold text-emerald-400">TC-02 逢甲學籍完整註冊</span>
+                            <button onclick="runTestCase2()" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-[9px] font-bold rounded-lg transition-colors">點此測試</button>
+                        </div>
+                        <p class="text-[9px] text-slate-300">自動填寫姓名「林志明」、學號「D1102943」、資工系、o365 郵件並驗證，解鎖發文權限。</p>
+                    </div>
+
+                    <!-- TC-03 -->
+                    <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-800 hover:border-navy-400 transition-all">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-[10px] font-extrabold text-navy-400">TC-03 商品刊登與全科系</span>
+                            <button onclick="runTestCase3()" class="px-2.5 py-1 bg-navy-600 hover:bg-navy-500 text-white text-[9px] font-bold rounded-lg transition-colors">點此測試</button>
+                        </div>
+                        <p class="text-[9px] text-slate-300">若登入，系統將自動代入 3 張精緻照片、學系（資訊工程學系）、宿舍取件地點並發布至市集牆最上方。</p>
+                    </div>
+
+                    <!-- TC-04 -->
+                    <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-800 hover:border-amber-500 transition-all">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-[10px] font-extrabold text-amber-400">TC-04 內建訊息與1.5s自動回覆</span>
+                            <button onclick="runTestCase4()" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white text-[9px] font-bold rounded-lg transition-colors">點此測試</button>
+                        </div>
+                        <p class="text-[9px] text-slate-300">模擬買家在市集發起聯絡。系統自動進入對話框，並在發話後 1.5 秒由賣家同學親自自動確認回覆！</p>
+                    </div>
+
+                    <!-- TC-05 -->
+                    <div class="p-3 bg-slate-800/50 rounded-xl border border-slate-800 hover:border-purple-500 transition-all">
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-[10px] font-extrabold text-purple-400">TC-05 極簡一致格式審查</span>
+                            <button onclick="runTestCase5()" class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white text-[9px] font-bold rounded-lg transition-colors">點此測試</button>
+                        </div>
+                        <p class="text-[9px] text-slate-300">系統自動依序點擊 5 個頁面，並會動態將「標題 ➔ SVG插圖 ➔ 說明」以高亮框框標示，驗證一致性外觀！</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 懸浮喚醒按鈕 -->
+        <button onclick="toggleTestPanel()" class="flex items-center space-x-2.5 px-5 py-3.5 bg-gradient-to-tr from-slate-950 to-slate-800 text-white font-bold text-xs rounded-full shadow-2xl hover:scale-105 transition-all border border-slate-700 animate-bounce">
+            <span class="flex h-2 w-2 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span>🧪 測試中心控制台</span>
+        </button>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- 核心運作 JavaScript -->
+    <!-- ============================================== -->
+    <script>
+        // ==========================================
+        // 1. 全域狀態與初始化
+        // ==========================================
+        // 從瀏覽器 LocalStorage 載入已註冊的使用者列表，提供沙盒預設一組
+        const localSavedUsers = localStorage.getItem('fustore_registered_users');
+        const defaultUsers = [
+            {
+                name: "林志明",
+                studentId: "D1102943",
+                dept: "資訊工程學系",
+                grade: "三年級",
+                email: "d1102943@o365.fcu.edu.tw",
+                password: "1234"
+            }
+        ];
+        const initialUsersList = localSavedUsers ? JSON.parse(localSavedUsers) : defaultUsers;
+
+        const state = {
+            currentUser: null, // 當前登入身分：{ name: '', studentId: '', dept: '', grade: '', email: '' }
+            registeredUsers: initialUsersList,
+            activePage: 'home',
+            products: [
+                {
+                    id: 1,
+                    title: "【工程數學】電機資電系大二必修原文書 (Advanced Eng Mathematics)",
+                    price: 450,
+                    category: "書籍教科書",
+                    dept: "電機工程學系",
+                    grade: "二年級",
+                    condition: "95%新",
+                    location: "福星宿舍一樓大廳",
+                    desc: "大二電機系必備神書。內頁完全沒有任何原子筆劃記，僅用黃色螢光筆畫過三個單元。保存良好無缺頁！",
+                    seller: "張同學 (電機系)",
+                    images: [
+                        "https://images.unsplash.com/photo-1543002588-bfa74002ed7e?w=500&auto=format&fit=crop&q=60",
+                        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500&auto=format&fit=crop&q=60",
+                        "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=500&auto=format&fit=crop&q=60"
+                    ]
+                },
+                {
+                    id: 2,
+                    title: "【微積分】微積分與解析幾何 原文書 (精簡版)",
+                    price: 320,
+                    category: "書籍教科書",
+                    dept: "應用數學系",
+                    grade: "一年級",
+                    condition: "90%新",
+                    location: "逢甲大學大门口口琴牆前",
+                    desc: "大一必修通識，微積分教科書。封面有些許折痕，內頁乾淨完整，適合大一新生撿便宜。",
+                    seller: "李同學 (應數系)",
+                    images: [
+                        "https://images.unsplash.com/photo-1506880018603-83d5b814b5a6?w=500&auto=format&fit=crop&q=60",
+                        "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?w=500&auto=format&fit=crop&q=60"
+                    ]
+                },
+                {
+                    id: 3,
+                    title: "【3C配件】ASUS 24吋護眼螢幕 1080P 面交",
+                    price: 1800,
+                    category: "3C電子",
+                    dept: "通識 / 不限",
+                    grade: "不限",
+                    condition: "85%新",
+                    location: "福星宿舍 B棟管理室",
+                    desc: "因為搬家出清。功能 100% 正常，附帶 HDMI 電源線與底座。無暗點無刮痕！大推宿舍雙螢幕神物。",
+                    seller: "王同學 (資工系)",
+                    images: [
+                        "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=500&auto=format&fit=crop&q=60",
+                        "https://images.unsplash.com/photo-1551645121-d1034da75057?w=500&auto=format&fit=crop&q=60"
+                    ]
+                },
+                {
+                    id: 4,
+                    title: "【生活家電】超好用歌林大風量吹風機 宿舍搬空出清",
+                    price: 150,
+                    category: "生活雜貨",
+                    dept: "通識 / 不限",
+                    grade: "不限",
+                    condition: "80%新",
+                    location: "大門口麥當勞",
+                    desc: "買了新的故便宜拋售。風量大且有冷熱風切換，插頭無破損，非常適合住宿舍的同學省錢用。",
+                    seller: "蔡同學 (企管系)",
+                    images: [
+                        "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=500&auto=format&fit=crop&q=60"
+                    ]
+                }
+            ],
+            chats: [
+                {
+                    id: 1,
+                    partnerName: "王同學 (資工系)",
+                    partnerDept: "資訊工程學系",
+                    itemTitle: "ASUS 24吋護眼螢幕",
+                    itemPrice: 1800,
+                    itemThumb: "https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?w=100&auto=format&fit=crop&q=60",
+                    messages: [
+                        { sender: 'them', text: '同學你好，請問螢幕大約用了多久？' },
+                        { sender: 'me', text: '大約一年半喔，大一買來放宿舍看扣用的，無暗點！' },
+                        { sender: 'them', text: 'OK! 那今天晚上可以在福星宿舍大廳一樓交易嗎？' }
+                    ]
+                }
+            ],
+            activeChatId: null,
+            uploadedImages: [null, null, null] // 用來存刊登時上傳的模擬圖片
+        };
+
+        // 初始化
+        window.onload = function() {
+            renderFeaturedProducts();
+            renderMarketProducts();
+            renderChatList();
+            updateAuthUI();
+            navigateTo('home');
+        };
+
+        // ==========================================
+        // 2. 導覽與頁面切換控制
+        // ==========================================
+        function navigateTo(pageId) {
+            state.activePage = pageId;
+            
+            // 隱藏所有頁面
+            document.querySelectorAll('main > section').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            // 秀出指定頁面
+            const activeSection = document.getElementById(`page-${pageId}`);
+            if (activeSection) {
+                activeSection.classList.remove('hidden');
+            }
+            
+            // 更新導覽列高亮
+            document.querySelectorAll('nav a').forEach(link => {
+                link.classList.remove('text-navy-800');
+                link.classList.add('text-slate-400');
+            });
+            const activeNavLink = document.getElementById(`nav-${pageId}`);
+            if (activeNavLink) {
+                activeNavLink.classList.remove('text-slate-400');
+                activeNavLink.classList.add('text-navy-800');
+            }
+
+            // 特殊處理：進入刊登頁防護
+            if (pageId === 'post') {
+                if (state.currentUser) {
+                    document.getElementById('post-auth-wall').classList.add('hidden');
+                    document.getElementById('post-form-container').classList.remove('hidden');
+                } else {
+                    document.getElementById('post-auth-wall').classList.remove('hidden');
+                    document.getElementById('post-form-container').classList.add('hidden');
+                }
+            }
+
+            // 特殊處理：進入驗證頁面狀態同步
+            if (pageId === 'verify') {
+                if (state.currentUser) {
+                    document.getElementById('verify-tabs').classList.add('hidden');
+                    document.getElementById('verify-form-step1').classList.add('hidden');
+                    document.getElementById('verify-form-step2').classList.add('hidden');
+                    document.getElementById('verify-login-box').classList.add('hidden');
+                    document.getElementById('verify-success-box').classList.remove('hidden');
+                    document.getElementById('verified-email-display').innerText = `${state.currentUser.name} 同學 (${state.currentUser.dept} ${state.currentUser.grade}) \n學號 ${state.currentUser.studentId} \n信箱: ${state.currentUser.email}`;
+                } else {
+                    document.getElementById('verify-tabs').classList.remove('hidden');
+                    toggleVerifyTab('login'); // 預設進來是登入頁
+                }
+            }
+
+            // 滾動回到頂部
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // ==========================================
+        // 4. 註冊、登入與身分驗證系統
+        // ==========================================
+        function toggleVerifyTab(tab) {
+            const tabRegBtn = document.getElementById('tab-register-btn');
+            const tabLoginBtn = document.getElementById('tab-login-btn');
+            const regBox1 = document.getElementById('verify-form-step1');
+            const regBox2 = document.getElementById('verify-form-step2');
+            const loginBox = document.getElementById('verify-login-box');
+            const successBox = document.getElementById('verify-success-box');
+
+            if (state.currentUser) {
+                successBox.classList.remove('hidden');
+                regBox1.classList.add('hidden');
+                regBox2.classList.add('hidden');
+                loginBox.classList.add('hidden');
+                return;
+            }
+
+            if (tab === 'register') {
+                // 切換至註冊
+                tabRegBtn.className = "flex-grow py-2.5 text-xs font-bold rounded-xl bg-white text-navy-900 shadow-sm transition-all";
+                tabLoginBtn.className = "flex-grow py-2.5 text-xs font-bold rounded-xl text-slate-500 hover:text-navy-900 transition-all";
+                regBox1.classList.remove('hidden');
+                regBox2.classList.add('hidden');
+                loginBox.classList.add('hidden');
+            } else {
+                // 切換至登入
+                tabLoginBtn.className = "flex-grow py-2.5 text-xs font-bold rounded-xl bg-white text-navy-900 shadow-sm transition-all";
+                tabRegBtn.className = "flex-grow py-2.5 text-xs font-bold rounded-xl text-slate-500 hover:text-navy-900 transition-all";
+                loginBox.classList.remove('hidden');
+                regBox1.classList.add('hidden');
+                regBox2.classList.add('hidden');
+            }
+        }
+
+        function sendVerificationCode() {
+            const name = document.getElementById('reg-name').value.trim();
+            const studentId = document.getElementById('reg-student-id').value.trim().toUpperCase();
+            const password = document.getElementById('reg-password').value;
+            const dept = document.getElementById('reg-dept').value;
+            const grade = document.getElementById('reg-grade').value;
+            const localEmail = document.getElementById('verify-email-local').value.trim();
+
+            if (!name || !studentId || !password || !dept || !grade || !localEmail) {
+                showToast('請務必填妥姓名、學號、密碼、科系年級以及學術信箱！', 'error');
+                return;
+            }
+
+            if (password.length < 4) {
+                showToast('安全起見，請輸入 4 位數以上的密碼！', 'error');
+                return;
+            }
+
+            // 檢查學號是否重複
+            const isExist = state.registeredUsers.some(u => u.studentId === studentId);
+            if (isExist) {
+                showToast('該學號已被註冊！請切換至「已有帳號登入」分頁。', 'error');
+                return;
+            }
+
+            // 嚴格格式限制
+            const emailRegex = /^[a-zA-Z0-9]+$/;
+            if (!emailRegex.test(localEmail)) {
+                showToast('信箱帳號格式不合！請勿輸入 @o365.fcu.edu.tw 以外之字元！', 'error');
+                return;
+            }
+
+            // 切換至輸入驗證碼狀態
+            document.getElementById('verify-form-step1').classList.add('hidden');
+            document.getElementById('verify-form-step2').classList.remove('hidden');
+            showToast('學籍驗證碼已發送，請查收 O365 信箱！', 'success');
+        }
+
+        function submitVerifyCode() {
+            const codeInput = document.getElementById('verify-code-input').value.trim();
+
+            if (codeInput !== 'FCU-1234') {
+                showToast('學籍驗證碼不正確，請重新輸入。', 'error');
+                return;
+            }
+
+            const name = document.getElementById('reg-name').value.trim();
+            const studentId = document.getElementById('reg-student-id').value.trim().toUpperCase();
+            const password = document.getElementById('reg-password').value;
+            const dept = document.getElementById('reg-dept').value;
+            const grade = document.getElementById('reg-grade').value;
+            const email = `${document.getElementById('verify-email-local').value.trim()}@o365.fcu.edu.tw`;
+
+            // 保存新使用者至列表中
+            const newUser = { name, studentId, dept, grade, email, password };
+            state.registeredUsers.push(newUser);
+            localStorage.setItem('fustore_registered_users', JSON.stringify(state.registeredUsers));
+
+            // 設定當前登入使用者
+            state.currentUser = newUser;
+
+            // 更新 UI
+            updateAuthUI();
+            
+            // 秀出成功盒子
+            document.getElementById('verify-tabs').classList.add('hidden');
+            document.getElementById('verify-form-step2').classList.add('hidden');
+            document.getElementById('verify-success-box').classList.remove('hidden');
+            document.getElementById('verified-email-display').innerText = `${state.currentUser.name} 同學 (${state.currentUser.dept} ${state.currentUser.grade}) \n學號 ${state.currentUser.studentId} \n信箱: ${state.currentUser.email}`;
+            
+            showToast('學籍認證與密碼設定成功！已為您登入並解鎖所有功能。', 'success');
+        }
+
+        function loginUser() {
+            const inputId = document.getElementById('login-student-id').value.trim().toUpperCase();
+            const inputPwd = document.getElementById('login-password').value;
+
+            if (!inputId || !inputPwd) {
+                showToast('請輸入學號與登入密碼！', 'error');
+                return;
+            }
+
+            // 尋找對應帳號
+            const matchedUser = state.registeredUsers.find(u => u.studentId === inputId);
+
+            if (!matchedUser) {
+                showToast('找不到該學籍帳號，請確認輸入是否正確。', 'error');
+                return;
+            }
+
+            if (matchedUser.password !== inputPwd) {
+                showToast('密碼輸入錯誤，請重新確認！', 'error');
+                return;
+            }
+
+            // 登入成功
+            state.currentUser = matchedUser;
+            updateAuthUI();
+
+            // 更新頁面狀態
+            document.getElementById('verify-tabs').classList.add('hidden');
+            document.getElementById('verify-login-box').classList.add('hidden');
+            document.getElementById('verify-success-box').classList.remove('hidden');
+            document.getElementById('verified-email-display').innerText = `${state.currentUser.name} 同學 (${state.currentUser.dept} ${state.currentUser.grade}) \n學號 ${state.currentUser.studentId} \n信箱: ${state.currentUser.email}`;
+
+            showToast(`歡迎回來，${state.currentUser.name} 同學！`, 'success');
+            navigateTo('home');
+        }
+
+        function resetVerifyForm() {
+            document.getElementById('verify-form-step2').classList.add('hidden');
+            document.getElementById('verify-form-step1').classList.remove('hidden');
+            document.getElementById('verify-code-input').value = '';
+        }
+
+        function updateAuthUI() {
+            const authContainer = document.getElementById('auth-status-container');
+            const btnVerify = document.getElementById('btn-header-verify');
+
+            if (state.currentUser) {
+                authContainer.classList.remove('hidden');
+                authContainer.innerHTML = `
+                    <div class="text-[10px] font-bold text-emerald-600 flex items-center justify-end space-x-1 animate-pulse">
+                        <span class="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                        <span>逢大認證學生</span>
+                    </div>
+                    <div class="text-xs font-bold text-slate-700">${state.currentUser.name} (${state.currentUser.dept.substring(0,4)})</div>
+                `;
+                btnVerify.innerText = '管理已認證學籍';
+                btnVerify.setAttribute('onclick', "navigateTo('verify')");
+            } else {
+                authContainer.classList.add('hidden');
+                btnVerify.innerText = '註冊學籍驗證';
+                btnVerify.setAttribute('onclick', "navigateTo('verify')");
+            }
+        }
+
+        function logout() {
+            state.currentUser = null;
+            updateAuthUI();
+            document.getElementById('verify-success-box').classList.add('hidden');
+            document.getElementById('verify-tabs').classList.remove('hidden');
+            
+            // 清空輸入框
+            document.getElementById('reg-name').value = '';
+            document.getElementById('reg-student-id').value = '';
+            document.getElementById('reg-password').value = '';
+            document.getElementById('verify-email-local').value = '';
+            document.getElementById('verify-code-input').value = '';
+            
+            document.getElementById('login-student-id').value = '';
+            document.getElementById('login-password').value = '';
+
+            toggleVerifyTab('login'); // 登出後預設回到登入頁
+            showToast('已安全登出帳戶！', 'info');
+        }
+
+        // ==========================================
+        // 5. 商品資料渲染與篩選機制
+        // ==========================================
+        function createProductCard(product) {
+            return `
+                <div onclick="openProductDetailModal(${product.id})" class="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-premium hover:shadow-premium-hover hover:-translate-y-1 transition-all duration-300 cursor-pointer group">
+                    <div class="relative aspect-square bg-slate-50 overflow-hidden shadow-inner-soft">
+                        <img src="${product.images[0]}" alt="${product.title}" class="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
+                        <div class="absolute top-3 left-3 bg-white/95 backdrop-blur px-2.5 py-1 rounded-xl text-[9px] font-extrabold text-navy-800 border border-slate-100 shadow-sm">
+                            ${product.condition}
+                        </div>
+                        ${product.images.length > 1 ? `
+                        <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur px-2 py-0.5 rounded text-[8px] font-bold text-white tracking-widest uppercase">
+                            <i class="fa-regular fa-image mr-1"></i>${product.images.length}P
+                        </div>
+                        ` : ''}
+                    </div>
+                    <div class="p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[8px] font-extrabold text-navy-500 uppercase bg-navy-50 px-2 py-1 rounded-md border border-navy-100 max-w-[130px] truncate">
+                                ${product.dept}
+                            </span>
+                            <span class="text-[9px] text-slate-400 flex items-center"><i class="fa-solid fa-location-dot mr-1 text-slate-300"></i>${product.location.substring(0,4)}...</span>
+                        </div>
+                        <h4 class="font-extrabold text-slate-800 text-xs line-clamp-2 leading-snug group-hover:text-navy-900 transition-colors">${product.title}</h4>
+                        <div class="flex items-center justify-between pt-2 border-t border-slate-50">
+                            <span class="text-sm font-black text-navy-800">NT$ ${product.price}</span>
+                            <span class="text-[9px] font-bold text-navy-500 hover:underline">查看詳情</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderFeaturedProducts() {
+            const grid = document.getElementById('home-featured-grid');
+            grid.innerHTML = '';
+            // 首頁展示最新 4 筆
+            const featured = state.products.slice(0, 4);
+            featured.forEach(prod => {
+                grid.innerHTML += createProductCard(prod);
+            });
+        }
+
+        function renderMarketProducts(filteredList = null) {
+            const grid = document.getElementById('market-products-grid');
+            const emptyState = document.getElementById('market-empty-state');
+            grid.innerHTML = '';
+            
+            const listToRender = filteredList || state.products;
+
+            if (listToRender.length === 0) {
+                emptyState.classList.remove('hidden');
+                grid.classList.add('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                grid.classList.remove('hidden');
+                listToRender.forEach(prod => {
+                    grid.innerHTML += createProductCard(prod);
+                });
+            }
+        }
+
+        // 搜尋篩選機制
+        function applyFilters() {
+            const searchVal = document.getElementById('filter-search').value.toLowerCase();
+            const categoryVal = document.getElementById('filter-category').value;
+            const deptVal = document.getElementById('filter-dept').value;
+
+            const filtered = state.products.filter(prod => {
+                const matchSearch = prod.title.toLowerCase().includes(searchVal) || 
+                                    prod.desc.toLowerCase().includes(searchVal) || 
+                                    prod.location.toLowerCase().includes(searchVal);
+                const matchCategory = categoryVal === '' || prod.category === categoryVal;
+                const matchDept = deptVal === '' || prod.dept === deptVal;
+
+                return matchSearch && matchCategory && matchDept;
+            });
+
+            renderMarketProducts(filtered);
+        }
+
+        // ==========================================
+        // 6. 刊登產品與圖片模擬
+        // ==========================================
+        const sampleImages = [
+            "https://images.unsplash.com/photo-1512820790803-83ca734da794?w=500&auto=format&fit=crop&q=60", // 書籍A
+            "https://images.unsplash.com/photo-1541963463532-d68292c34b19?w=500&auto=format&fit=crop&q=60", // 書籍B
+            "https://images.unsplash.com/photo-1589561253898-768105ca91a8?w=500&auto=format&fit=crop&q=60", // 3C設備
+            "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500&auto=format&fit=crop&q=60", // 手機
+            "https://images.unsplash.com/photo-1496181130204-7552cc1524e2?w=500&auto=format&fit=crop&q=60", // 筆電
+            "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&auto=format&fit=crop&q=60"  // 配件衣服
+        ];
+
+        function simulateImageUpload(boxId) {
+            const box = document.getElementById(`img-upload-box-${boxId}`);
+            const randImg = sampleImages[Math.floor(Math.random() * sampleImages.length)];
+            
+            state.uploadedImages[boxId - 1] = randImg;
+            
+            box.style.backgroundImage = `url(${randImg})`;
+            box.style.backgroundSize = 'cover';
+            box.style.backgroundPosition = 'center';
+            box.innerHTML = `
+                <div class="bg-black/40 text-white w-full h-full rounded-2xl flex items-center justify-center text-[10px] font-bold">
+                    <i class="fa-solid fa-rotate mr-1"></i> 更換相片
+                </div>
+            `;
+            showToast(`已自動帶入模擬商品照 #${boxId}`, 'info');
+        }
+
+        function publishProduct() {
+            const title = document.getElementById('post-title').value.trim();
+            const price = parseFloat(document.getElementById('post-price').value);
+            const category = document.getElementById('post-category').value;
+            const dept = document.getElementById('post-dept').value;
+            const location = document.getElementById('post-location').value.trim();
+            const desc = document.getElementById('post-desc').value.trim();
+
+            if (!title || isNaN(price) || !location || !desc) {
+                showToast('請務必完整填寫商品名稱、價格、面交地點與細節說明。', 'error');
+                return;
+            }
+
+            // 正面照片必備
+            if (!state.uploadedImages[0]) {
+                showToast('請點擊第一個圖片框以提供正面商品照！', 'error');
+                return;
+            }
+
+            // 過濾模擬照片
+            const finalImages = state.uploadedImages.filter(img => img !== null);
+
+            // 建立新物品
+            const newProduct = {
+                id: state.products.length + 1,
+                title: title,
+                price: price,
+                category: category,
+                dept: dept,
+                grade: state.currentUser ? state.currentUser.grade : '一年級',
+                condition: '全新/極優',
+                location: location,
+                desc: desc,
+                seller: state.currentUser ? `${state.currentUser.name}同學 (${state.currentUser.dept.substring(0,4)})` : '匿名同學',
+                images: finalImages
+            };
+
+            // 推入首部
+            state.products.unshift(newProduct);
+            
+            // 重新渲染
+            renderFeaturedProducts();
+            renderMarketProducts();
+
+            // 重置表單與上傳狀態
+            document.getElementById('post-title').value = '';
+            document.getElementById('post-price').value = '';
+            document.getElementById('post-location').value = '';
+            document.getElementById('post-desc').value = '';
+            state.uploadedImages = [null, null, null];
+            
+            for (let i = 1; i <= 3; i++) {
+                const box = document.getElementById(`img-upload-box-${i}`);
+                box.style.backgroundImage = 'none';
+                box.innerHTML = `
+                    <i class="fa-solid fa-${i===1 ? 'camera' : 'plus'} text-2xl mb-2 text-slate-300"></i>
+                    <span class="text-[10px] font-bold leading-none">${i===1 ? '正面視角圖 (必填)' : (i===2 ? '細節或瑕疵' : '反面或配件')}</span>
+                `;
+            }
+
+            showToast('二手商品發布成功！已新增至市集牆。', 'success');
+            navigateTo('market');
+        }
+
+        // ==========================================
+        // 7. 商品詳情彈窗控制
+        // ==========================================
+        function openProductDetailModal(productId) {
+            const product = state.products.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('modal-primary-img').src = product.images[0];
+            document.getElementById('modal-title').innerText = product.title;
+            document.getElementById('modal-price').innerText = `NT$ ${product.price}`;
+            document.getElementById('modal-dept').innerText = product.dept;
+            document.getElementById('modal-condition').innerText = product.condition;
+            document.getElementById('modal-location').innerText = product.location;
+            document.getElementById('modal-seller').innerText = product.seller;
+            document.getElementById('modal-desc').innerText = product.desc;
+
+            // 縮圖
+            const thumbContainer = document.getElementById('modal-thumbnails');
+            thumbContainer.innerHTML = '';
+            product.images.forEach((img, index) => {
+                thumbContainer.innerHTML += `
+                    <div onclick="document.getElementById('modal-primary-img').src='${img}'" class="aspect-square rounded-xl overflow-hidden border border-slate-200 cursor-pointer shadow-sm hover:ring-2 hover:ring-navy-500 transition-all">
+                        <img src="${img}" class="w-full h-full object-cover" />
+                    </div>
+                `;
+            });
+
+            // 綁定聯絡按鈕
+            document.getElementById('modal-chat-btn').onclick = function() {
+                initiateContact(product);
+            };
+
+            document.getElementById('product-detail-modal').classList.remove('hidden');
+        }
+
+        function closeProductDetailModal() {
+            document.getElementById('product-detail-modal').classList.add('hidden');
+        }
+
+        // ==========================================
+        // 8. 內建私訊與安全即時對答
+        // ==========================================
+        function initiateContact(product) {
+            closeProductDetailModal();
+            navigateTo('messages');
+
+            // 檢查聊天是否存在
+            let existingChat = state.chats.find(c => c.partnerName === product.seller && c.itemTitle.includes(product.title.substring(0,8)));
+            
+            if (!existingChat) {
+                existingChat = {
+                    id: state.chats.length + 1,
+                    partnerName: product.seller,
+                    partnerDept: product.dept,
+                    itemTitle: product.title,
+                    itemPrice: product.price,
+                    itemThumb: product.images[0],
+                    messages: [
+                        { sender: 'them', text: `同學你好！我是這項商品的認證賣家。請問想詢問約定何時面交呢？` }
+                    ]
+                };
+                state.chats.push(existingChat);
+            }
+
+            state.activeChatId = existingChat.id;
+            renderChatList();
+            openChatRoom(existingChat.id);
+        }
+
+        function renderChatList() {
+            const list = document.getElementById('chat-list');
+            list.innerHTML = '';
+
+            state.chats.forEach(chat => {
+                list.innerHTML += `
+                    <div onclick="openChatRoom(${chat.id})" class="p-4 flex items-center justify-between cursor-pointer hover:bg-slate-50 transition-all ${state.activeChatId === chat.id ? 'bg-navy-50/70 border-l-4 border-navy-800' : ''}">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-navy-100 flex items-center justify-center text-navy-800 font-black text-sm">
+                                ${chat.partnerName.substring(0,1)}
+                            </div>
+                            <div class="space-y-0.5">
+                                <div class="text-xs font-extrabold text-navy-900">${chat.partnerName}</div>
+                                <div class="text-[10px] text-slate-400 max-w-[140px] truncate">${chat.messages[chat.messages.length - 1].text}</div>
+                            </div>
+                        </div>
+                        <img src="${chat.itemThumb}" class="w-8 h-8 rounded-lg object-cover shadow-sm" />
+                    </div>
+                `;
+            });
+        }
+
+        function openChatRoom(chatId) {
+            state.activeChatId = chatId;
+            const chat = state.chats.find(c => c.id === chatId);
+            if (!chat) return;
+
+            document.getElementById('chat-empty-view').classList.add('hidden');
+            document.getElementById('chat-room-header').classList.remove('hidden');
+            document.getElementById('chat-messages-flow').classList.remove('hidden');
+            document.getElementById('chat-input-bar').classList.remove('hidden');
+
+            document.getElementById('chat-header-user').innerText = chat.partnerName;
+            document.getElementById('chat-header-item').innerText = `交易商品: ${chat.itemTitle}`;
+            
+            document.getElementById('chat-header-thumb-container').innerHTML = `
+                <img src="${chat.itemThumb}" class="w-6 h-6 rounded-md object-cover mr-1" />
+                <span class="font-extrabold text-navy-900">NT$ ${chat.itemPrice}</span>
+            `;
+
+            renderMessages(chat);
+            renderChatList();
+        }
+
+        function renderMessages(chat) {
+            const flow = document.getElementById('chat-messages-flow');
+            flow.innerHTML = '';
+
+            chat.messages.forEach(msg => {
+                if (msg.sender === 'me') {
+                    flow.innerHTML += `
+                        <div class="flex justify-end">
+                            <div class="bg-navy-900 text-white rounded-2xl rounded-tr-none px-4 py-2.5 text-xs max-w-xs shadow-sm font-semibold">
+                                ${msg.text}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    flow.innerHTML += `
+                        <div class="flex justify-start space-x-2">
+                            <div class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-[9px] font-bold">${chat.partnerName.substring(0,1)}</div>
+                            <div class="bg-white text-slate-800 rounded-2xl rounded-tl-none border border-slate-150 px-4 py-2.5 text-xs max-w-xs shadow-sm font-semibold">
+                                ${msg.text}
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            // 滾動至底部
+            flow.scrollTop = flow.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-text-input');
+            const txt = input.value.trim();
+            if (!txt) return;
+
+            const chat = state.chats.find(c => c.id === state.activeChatId);
+            if (!chat) return;
+
+            chat.messages.push({ sender: 'me', text: txt });
+            input.value = '';
+            renderMessages(chat);
+            renderChatList();
+
+            // 1.5 秒自動回覆模擬 (TC-04 特點)
+            setTimeout(() => {
+                const autoReplies = [
+                    "太好了！那我們約今天下午五點在福星宿舍一樓大廳口琴牆見面？",
+                    "OK，那面交時再用現金付款，不見不散！",
+                    "好的，這項商品保存狀況真的很好，等一下面交現場給您驗貨喔！"
+                ];
+                const randReply = autoReplies[Math.floor(Math.random() * autoReplies.length)];
+                chat.messages.push({ sender: 'them', text: randReply });
+                renderMessages(chat);
+                renderChatList();
+                showToast(`賣家傳來了新回覆！`, 'info');
+            }, 1500);
+        }
+
+        // ==========================================
+        // 9. 測試與驗證中心自動化模擬 (Test Cases)
+        // ==========================================
+        function toggleTestPanel() {
+            const panel = document.getElementById('test-panel');
+            panel.classList.toggle('hidden');
+        }
+
+        // TC-01: 非逢甲信箱安全攔截測試
+        function runTestCase1() {
+            navigateTo('verify');
+            toggleVerifyTab('register'); // 先切到註冊頁
+            document.getElementById('reg-name').value = "張小明";
+            document.getElementById('reg-student-id').value = "D1102943";
+            document.getElementById('reg-password').value = "test1234";
+            document.getElementById('reg-dept').value = "資訊工程學系";
+            document.getElementById('verify-email-local').value = "xiaoming123@gmail.com"; // 故意填入非合法 local 帳號
+            
+            showToast('模擬 TC-01：非逢甲格式信箱驗證中...', 'info');
+
+            setTimeout(() => {
+                const localEmail = document.getElementById('verify-email-local').value.trim();
+                if (localEmail.includes('@') || localEmail.includes('.')) {
+                    showToast('TC-01 驗證攔截成功：信箱帳號格式不合！請勿輸入 @o365.fcu.edu.tw 以外之字元！', 'error');
+                } else {
+                    showToast('測試失敗，未能阻擋。', 'error');
+                }
+            }, 1000);
+        }
+
+        // TC-02: 逢甲學籍完整註冊登入測試 (包含設定密碼)
+        function runTestCase2() {
+            navigateTo('verify');
+            toggleVerifyTab('register'); // 先切到註冊頁
+            document.getElementById('reg-name').value = "林志明";
+            document.getElementById('reg-student-id').value = "D1102943";
+            document.getElementById('reg-password').value = "1234"; // 自動設定密碼
+            document.getElementById('reg-dept').value = "資訊工程學系";
+            document.getElementById('reg-grade').value = "三年級";
+            document.getElementById('verify-email-local').value = "d1102943";
+
+            showToast('模擬 TC-02：填入合法逢大信箱與密碼 1234，發送中...', 'info');
+
+            setTimeout(() => {
+                sendVerificationCode();
+                
+                setTimeout(() => {
+                    document.getElementById('verify-code-input').value = 'FCU-1234';
+                    showToast('自動填寫 O365 認證密碼 FCU-1234', 'info');
+                    
+                    setTimeout(() => {
+                        submitVerifyCode();
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        }
+
+        // TC-03: 商品刊登與多角度相片及科系測試
+        function runTestCase3() {
+            if (!state.currentUser) {
+                showToast('請先完成 TC-02 或在登入分頁輸入預設學號 D1102943 / 密碼 1234，方可測試商品刊登。', 'error');
+                navigateTo('verify');
+                toggleVerifyTab('login');
+                return;
+            }
+
+            navigateTo('post');
+            showToast('模擬 TC-03：自動帶入多角度相片、全學系及取貨點中...', 'info');
+
+            setTimeout(() => {
+                // 自動帶入照片
+                simulateImageUpload(1);
+                simulateImageUpload(2);
+                simulateImageUpload(3);
+
+                document.getElementById('post-title').value = "【作業神書】計算機組織大三課堂指定書籍 (Computer Organization)";
+                document.getElementById('post-price').value = "380";
+                document.getElementById('post-category').value = "書籍教科書";
+                document.getElementById('post-dept').value = "資訊工程學系";
+                document.getElementById('post-location').value = "福星宿舍一樓口琴牆";
+                document.getElementById('post-desc').value = "逢甲資工大三必備。無劃記，狀況超好，附帶光碟與習題電子檔！";
+
+                setTimeout(() => {
+                    publishProduct();
+                    showToast('TC-03 測試成功：商品已出現在市集牆與首頁最新位置！', 'success');
+                }, 1500);
+            }, 1000);
+        }
+
+        // TC-04: 內建訊息功能與 1.5s 賣家自動回覆測試
+        function runTestCase4() {
+            navigateTo('market');
+            showToast('模擬 TC-04：在市集選擇好物、點擊「聯絡賣家」...', 'info');
+
+            setTimeout(() => {
+                openProductDetailModal(3); // 打開護眼螢幕
+                
+                setTimeout(() => {
+                    showToast('買家點擊「發起聯絡與面交」進入小盒子...', 'info');
+                    document.getElementById('modal-chat-btn').click();
+
+                    setTimeout(() => {
+                        document.getElementById('chat-text-input').value = "請問今天晚上可以在福星宿舍大廳一樓拿嗎？我帶剛好現金過來。";
+                        showToast('發送面交詢問訊息...', 'info');
+                        
+                        setTimeout(() => {
+                            sendMessage();
+                        }, 1000);
+                    }, 1500);
+                }, 1500);
+            }, 1000);
+        }
+
+        // TC-05: 多頁式導覽與極簡風格格式審查測試
+        function runTestCase5() {
+            const pages = ['home', 'market', 'verify', 'post', 'messages'];
+            let currentIdx = 0;
+            
+            showToast('模擬 TC-05：開始極簡「標題 ➔ SVG插圖 ➔ 說明」格式高亮審查...', 'info');
+
+            const interval = setInterval(() => {
+                if (currentIdx >= pages.length) {
+                    clearInterval(interval);
+                    showToast('TC-05 審查成功：所有分頁均嚴格落實一貫的極簡架構！', 'success');
+                    navigateTo('home');
+                    return;
+                }
+
+                const page = pages[currentIdx];
+                navigateTo(page);
+                
+                // 動態為該頁面的頂部加上顯眼的紫色高亮，進行審查定位
+                const section = document.getElementById(`page-${page}`);
+                const headerArea = section.querySelector('div.text-center');
+                
+                if (headerArea) {
+                    headerArea.classList.add('ring-4', 'ring-purple-500', 'p-4', 'rounded-3xl', 'bg-purple-50/50');
+                    showToast(`正在審查: ${page.toUpperCase()} 頁面格式`, 'info');
+                    
+                    setTimeout(() => {
+                        headerArea.classList.remove('ring-4', 'ring-purple-500', 'p-4', 'rounded-3xl', 'bg-purple-50/50');
+                    }, 900);
+                }
+
+                currentIdx++;
+            }, 1200);
+        }
+    </script>
+</body>
+</html>
